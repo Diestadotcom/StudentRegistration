@@ -1,73 +1,139 @@
 using System;
 using System.Windows.Forms;
 
-namespace StudentRegistrationApplication
+namespace StudentRegistration
 {
-    public partial class Form1 : Form
+    public partial class StudentRegistration : Form
     {
-        public Form1()
+        public StudentRegistration()
         {
             InitializeComponent();
         }
 
-        // This runs as soon as the Form opens
-        private void Form1_Load(object sender, EventArgs e)
+        private void StudentRegistration_Load(object sender, EventArgs e)
         {
-            PopulateDateControls();
+            // Load only once (prevents resetting issue)
+            if (araw.Items.Count == 0)
+            {
+                LoadComboBoxes();
+            }
         }
 
-        private void PopulateDateControls()
+        private void LoadComboBoxes()
         {
-            // Clear and add default prompts
-            cmbDay.Items.Clear();
-            cmbMonth.Items.Clear();
-            cmbYear.Items.Clear();
+            // Clear first (safe)
+            araw.Items.Clear();
+            buwan.Items.Clear();
+            taon.Items.Clear();
+            programa.Items.Clear();
 
-            cmbDay.Items.Add("-Day-");
-            cmbMonth.Items.Add("-Month-");
-            cmbYear.Items.Add("-Year-");
+            // Days
+            for (int i = 1; i <= 31; i++)
+                araw.Items.Add(i.ToString());
 
-            // Fill Days 1-31
-            for (int i = 1; i <= 31; i++) cmbDay.Items.Add(i);
+            // Months
+            string[] months = {
+                "January","February","March","April","May","June",
+                "July","August","September","October","November","December"
+            };
+            buwan.Items.AddRange(months);
 
-            // Fill Months 1-12
-            for (int i = 1; i <= 12; i++) cmbMonth.Items.Add(i);
+            // Years
+            for (int i = 1950; i <= DateTime.Now.Year; i++)
+                taon.Items.Add(i.ToString());
 
-            // Fill Years (Current Year down to 1900)
-            for (int i = DateTime.Now.Year; i >= 1900; i--) cmbYear.Items.Add(i);
+            // Programs
+            string[] programs = {
+                "Bachelor of Computer Engineering",
+                "Bachelor of Computer Science",
+                "Bachelor of Information System",
+                "Bachelor of Information Technology"
+            };
+            programa.Items.AddRange(programs);
 
-            // Select the "-Prompts-" by default
-            cmbDay.SelectedIndex = 0;
-            cmbMonth.SelectedIndex = 0;
-            cmbYear.SelectedIndex = 0;
+            // Placeholder text (no more reset bug)
+            araw.Text = "-Day-";
+            buwan.Text = "-Month-";
+            taon.Text = "-Year-";
+            programa.Text = "-Program-";
+        }
+
+        private bool IsValid()
+        {
+            if (string.IsNullOrWhiteSpace(LastNametxt.Text) ||
+                string.IsNullOrWhiteSpace(FirstNametxt.Text) ||
+                string.IsNullOrWhiteSpace(MiddleNametxt.Text))
+            {
+                MessageBox.Show("Please fill in all name fields.");
+                return false;
+            }
+
+            if (!rbMale.Checked && !rbFemale.Checked)
+            {
+                MessageBox.Show("Please select gender.");
+                return false;
+            }
+
+            if (araw.Text == "-Day-" ||
+                buwan.Text == "-Month-" ||
+                taon.Text == "-Year-" ||
+                programa.Text == "-Program-")
+            {
+                MessageBox.Show("Please complete all selections.");
+                return false;
+            }
+
+            return true;
         }
 
         private void btnRegister_Click(object sender, EventArgs e)
         {
-            // Basic Validation
-            if (string.IsNullOrWhiteSpace(FirstNametxt.Text) || cmbDay.SelectedIndex == 0)
-            {
-                MessageBox.Show("Please fill in the required fields.", "Validation Error");
-                return;
-            }
+            if (!IsValid()) return;
 
-            // Gather Data
-            string name = $"{FirstNametxt.Text} {MiddleNametxt.Text} {LastNametxt.Text}";
+            string fullName = $"{FirstNametxt.Text} {MiddleNametxt.Text} {LastNametxt.Text}";
             string gender = rbMale.Checked ? "Male" : "Female";
-            string dob = $"{cmbDay.Text}/{cmbMonth.Text}/{cmbYear.Text}";
+            string dob = $"{araw.Text}/{buwan.Text}/{taon.Text}";
+            string program = programa.Text;
 
-            // Display Results
-            MessageBox.Show($"Student: {name}\nGender: {gender}\nDOB: {dob}", "Registration Successful");
+            MessageBox.Show(
+                $"Student Name: {fullName}\n" +
+                $"Gender: {gender}\n" +
+                $"Date of Birth: {dob}\n" +
+                $"Program: {program}",
+                "Student Information",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
         }
 
-        private void MiddleNametxt_TextChanged(object sender, EventArgs e)
+    
+        private void browse_Click(object sender, EventArgs e)
         {
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                MessageBox.Show("File selected: " + openFileDialog1.FileName);
 
+                pictureBox1.ImageLocation = openFileDialog1.FileName;
+                pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            }
         }
-
-        private void cmbDay_SelectedIndexChanged(object sender, EventArgs e)
+        // METHOD OVERLOADING (optional feature)
+        public void ShowStudentInfo(string f, string l)
         {
-
+            MessageBox.Show($"Student: {f} {l}");
         }
+
+        public void ShowStudentInfo(string f, string l, string p)
+        {
+            MessageBox.Show($"Student: {f} {l}\nProgram: {p}");
+        }
+
+        public void ShowStudentInfo(string f, string l, string p, string d)
+        {
+            MessageBox.Show($"Name: {f} {l}\nProgram: {p}\nBirthday: {d}");
+        }
+
     }
 }
+
+
